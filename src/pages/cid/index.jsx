@@ -36,7 +36,7 @@ export default function CidGraph() {
     const { data: account } = useAccount()
     const { data: ensAvatar } = useEnsAvatar({ addressOrName: account?.address })
     const { data: ensName } = useEnsName({ address: account?.address })
-    const { connect, connectors, error, isConnecting, pendingConnector } = useConnect()
+    const { connect, connectors, error,isLoading, pendingConnector } = useConnect()
     const { disconnect } = useDisconnect()
     // 首页total
     const [totalInfo,setTotalInfo] = useState({})
@@ -134,7 +134,11 @@ export default function CidGraph() {
                 key={connector.id}
                 onClick={() => connect(connector)}
             >
-                CONNECT WALLET
+                {connector.name}
+                {!connector.ready && ' (unsupported)'}
+                {isLoading &&
+                connector.id === pendingConnector?.id &&
+                ' (connecting)'}
             </button>
             ))}
         </div>
