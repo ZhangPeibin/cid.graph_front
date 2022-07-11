@@ -222,8 +222,9 @@ export default function CidGraph() {
                                renderItem={(cidItem) => <List.Item className='list-item'>
                                    <img
                                        height={52}
+                                       width={72}
                                        alt="preview"
-                                       style={{marginRight:"12px"}}
+                                       style={{objectFit:"scale-down",marginRight:"12px"}}
                                        src={getIPFSLink({cidItem})}
                                    />
                                    {cidItem}
