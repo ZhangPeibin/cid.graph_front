@@ -63,3 +63,7 @@ export const reqGetTotalInfo = () => ajax(BASE_URL+'/total/info')
 export const reqGraphs = (reqObj) => ajax(BASE_URL+'/api/v1/graphs', reqObj,'GET')
 
 export const reqCids = (reqObj) => ajax(BASE_URL+'/api/v1/cids', reqObj,'GET')
+
+
+//add cid
+export const addCid = (cidObj) => ajax(BASE_URL+'/api/v1/cid', cidObj, 'POST')

@@ -11,9 +11,10 @@ import {
     useEnsName,
   } from 'wagmi'
 import "./index.less"
-import {reqCids, reqGetToken, reqGetTotalInfo, reqGraphs} from '../../api';
+import {addCid, reqCids, reqGetToken, reqGetTotalInfo, reqGraphs} from '../../api';
 import { Col, Row } from 'antd';
 import { useEffect,useState } from 'react';
+import {Web3Storage} from "web3.storage";
 const { Search } = Input;
 
 const onSearch = (value) => console.log(value);
@@ -28,10 +29,9 @@ const flatten = (arr) => {
 const flattenCID = (arr) => {
     if(!arr) return []
     const res =  arr.map(item =>  item.cid )
-    console.log('res',res)
     return res
 }
-
+const TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweDk2YTQzQ0Q0MEUwZkRhODU2Q2JGOUYzN0Y5MkJkNTM2RjRlODAwNzIiLCJpc3MiOiJ3ZWIzLXN0b3JhZ2UiLCJpYXQiOjE2NTcwODIxMjc0MTAsIm5hbWUiOiJydXN0LXZpZGVvLWJhaXNjIn0.-jf-5qDcA2fbQ66hmNlquxLJ8JdAftrrUEQtftbNsIM"
 export default function CidGraph() {
     const { data: account } = useAccount()
     const { data: ensAvatar } = useEnsAvatar({ addressOrName: account?.address })
@@ -50,6 +50,22 @@ export default function CidGraph() {
     // 分页
     const [current, setCurrent] = useState(1);
 
+    const client = new Web3Storage({token: TOKEN});
+
+    const onInputChange = async (event) => {
+        const selectedFiles = event.target.files;
+        console.log(selectedFiles)
+        try {
+            const rootCid = await client.put(selectedFiles,{wrapWithDirectory:false});
+            console.log("Successfully sent to IPFS");
+            console.log("https://" + rootCid + ".ipfs.dweb.link");
+            addCidRequest(rootCid,selectedFiles[0])
+        } catch {
+            console.log("Failed to send to IPFS");
+        }
+    }
+
+
     useEffect(()=>{
         if(!token){
             onSignIn();
@@ -60,7 +76,6 @@ export default function CidGraph() {
     useEffect(() => {
         const reqGetTotalInfoRes = async () => {
             const res = await reqGetTotalInfo();
-            console.log("totalInfo",res);
             setTotalInfo(res.data)
         }
         reqGetTotalInfoRes() 
@@ -104,7 +119,6 @@ export default function CidGraph() {
     }
 
     const onSignIn = () => {
-        console.log("sign in")
         const requestObj = {
             kind: "www",
             name: "zzz",
@@ -114,7 +128,27 @@ export default function CidGraph() {
         reqGetToken(requestObj).then(res => {
             console.log('sign in success',res.data.token);
             setToken(res.data.token)
+            localStorage.setItem("token",res.data.token)
         }
+        ).catch(err => {
+            console.log(err)
+        })
+    }
+
+
+    const addCidRequest = (cid,file) => {
+        const requestObj = {
+            cid: cid,
+            desc: file.name,
+            name: file.name,
+            size: file.size,
+            state: 0,
+            type: file.type,
+            version: 0
+        }
+        addCid(requestObj).then(res => {
+                console.log(res)
+            }
         ).catch(err => {
             console.log(err)
         })
@@ -126,7 +160,17 @@ export default function CidGraph() {
             <div className='logo'></div>
             <Search className='cidgraph-header-search' placeholder="SEARCH BY PUECE COD DELE OR MINAB ID" onSearch={onSearch} enterButton />
 
-            <button className='btn-connect' onClick={()=>onSignIn()}>Upload</button>
+            <div>
+                <input type="file"
+                       id="file"
+                       onChange={onInputChange}
+                       style={{display: "none"}}/>
+                <button className='btn-upload'>
+                    <label htmlFor="file" >
+                        Upload
+                    </label>
+                </button>
+            </div>
 
             {connectors.map((connector) => (
             <button className='btn-connect'
