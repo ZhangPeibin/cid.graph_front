@@ -197,6 +197,7 @@ export default function CidGraph() {
                                 <img
                                     height={52}
                                     alt="logo"
+                                    style={{marginRight:"12px"}}
                                     src="https://gw.alipayobjects.com/zos/rmsportal/mqaQswcyDLcXyDKnZfES.png"
                                 />
                                 {item}
