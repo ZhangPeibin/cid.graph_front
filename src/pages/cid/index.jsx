@@ -177,8 +177,9 @@ export default function CidGraph() {
                                dataSource={flattenCID(cids.lists)}
                                renderItem={(cidItem) => <List.Item className='list-item'>
                                    <img
-                                       width={72}
+                                       height={52}
                                        alt="preview"
+                                       style={{marginRight:"12px"}}
                                        src={getIPFSLink({cidItem})}
                                    />
                                    {cidItem}
@@ -194,7 +195,7 @@ export default function CidGraph() {
                             dataSource={flatten(graphs.lists)}
                             renderItem={(item) => <List.Item className='list-item'>
                                 <img
-                                    width={72}
+                                    height={52}
                                     alt="logo"
                                     src="https://gw.alipayobjects.com/zos/rmsportal/mqaQswcyDLcXyDKnZfES.png"
                                 />
