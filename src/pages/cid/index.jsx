@@ -2,7 +2,6 @@ import React from 'react'
 import { Card } from 'antd';
 import { Divider, List, Typography } from 'antd';
 import { Pagination } from 'antd';
-import { AudioOutlined } from '@ant-design/icons';
 import { Input, Space } from 'antd';
 import {
     useAccount,
@@ -12,7 +11,7 @@ import {
     useEnsName,
   } from 'wagmi'
 import "./index.less"
-import { reqGetToken,reqGetTotalInfo, reqGraphs } from '../../api';
+import {reqCids, reqGetToken, reqGetTotalInfo, reqGraphs} from '../../api';
 import { Col, Row } from 'antd';
 import { useEffect,useState } from 'react';
 const { Search } = Input;
@@ -40,10 +39,17 @@ export default function CidGraph() {
     const [token,setToken] = useState('')
     // 图表数据
     const [graphs,setGraphs] = useState([])
+    // cid 数据
+    const [cids,setCids] = useState([])
 
     // 分页
     const [current, setCurrent] = useState(1);
 
+    useEffect(()=>{
+        if(!token){
+            onSignIn();
+        }
+    })
 
     // 每次页面挂载时会执行一次
     useEffect(() => {
@@ -62,7 +68,7 @@ export default function CidGraph() {
             setGraphs(res.data)
             console.log('graphs',res.data);
         }
-        if(token !== ''){
+        if(token){
             console.log("token",token);
             const reqObj = {
                 token: token,
@@ -71,6 +77,23 @@ export default function CidGraph() {
             reqGraphsRes(reqObj)
         }
     },[token,current])
+
+    useEffect(() => {
+        //获取账号的graphs
+        const reqCidPools = async (reqObj) => {
+            const res = await reqCids(reqObj);
+            setCids(res.data)
+            console.log('cids',cids);
+        }
+        if(token){
+            const reqObj = {
+                token: token,
+                page: current
+            }
+            reqCidPools(reqObj)
+        }
+    },[token,current])
+
 
     const onSignIn = () => {
         console.log("sign in")
@@ -92,8 +115,11 @@ export default function CidGraph() {
   return (
     <div className='cidgraph'>
         <div className='cidgraph-header'>
-            <div className='logo'>logo</div>
+            <div className='logo'></div>
             <Search className='cidgraph-header-search' placeholder="SEARCH BY PUECE COD DELE OR MINAB ID" onSearch={onSearch} enterButton />
+
+            <button className='btn-connect' onClick={()=>onSignIn()}>Upload</button>
+
             {connectors.map((connector) => (
             <button className='btn-connect'
                 disabled={!connector.ready}
@@ -103,7 +129,6 @@ export default function CidGraph() {
                 CONNECT WALLET
             </button>
             ))}
-            <button className='btn-connect' onClick={()=>onSignIn()}>登录|注册</button>
         </div>
         <div className='cidgraph-content'>
              <Row gutter={16} className="cidgraph-cards">
@@ -133,8 +158,15 @@ export default function CidGraph() {
 
              <Row  gutter={16}>
                 <Col span={12}>
-                    <div  className='cidgraph-card-colume'>1111</div>
-                </Col>
+                    <div  className='cidgraph-card-colume'>
+                        <List  className='cidgraph-card-colume-list'
+                               header={<div>CID</div>}
+                               pagination = {false}
+                               dataSource={flatten(cids.lists)}
+                               renderItem={(cidItem) => <List.Item className='list-item'>{cidItem.cid}</List.Item>}
+                        />
+                        <Pagination style={{height: '32px', lineHeight: '32px', textAlign: 'right'}} current={current} onChange={page=>setCurrent(page)} total={cids.total} />
+                    </div>                </Col>
                 <Col span={12}>
                     <div  className='cidgraph-card-colume'>
                         <List  className='cidgraph-card-colume-list'

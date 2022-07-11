@@ -61,3 +61,5 @@ export const reqGetTotalInfo = () => ajax(BASE_URL+'/total/info')
 
 //Get multiple graphs /api/v1/graphs
 export const reqGraphs = (reqObj) => ajax(BASE_URL+'/api/v1/graphs', reqObj,'GET')
+
+export const reqCids = (reqObj) => ajax(BASE_URL+'/api/v1/cids', reqObj,'GET')
