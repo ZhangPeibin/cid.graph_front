@@ -22,9 +22,14 @@ const onSearch = (value) => console.log(value);
 const flatten = (arr) => {
     if(!arr) return []
     const res =  arr.map(item =>  item.ipfs_cid + " " + item.name + " " + item.desc )
+    return res
+}
+
+const flattenCID = (arr) => {
+    if(!arr) return []
+    const res =  arr.map(item =>  item.cid )
     console.log('res',res)
     return res
-
 }
 
 export default function CidGraph() {
@@ -94,6 +99,9 @@ export default function CidGraph() {
         }
     },[token,current])
 
+    const getIPFSLink = (cid) =>{
+        return "https://ipfs.io/ipfs/" + cid['cidItem']
+    }
 
     const onSignIn = () => {
         console.log("sign in")
@@ -160,20 +168,34 @@ export default function CidGraph() {
                 <Col span={12}>
                     <div  className='cidgraph-card-colume'>
                         <List  className='cidgraph-card-colume-list'
-                               header={<div>CID</div>}
+                               header={<div style={{marginLeft:"16px"}}>CID</div>}
                                pagination = {false}
-                               dataSource={flatten(cids.lists)}
-                               renderItem={(cidItem) => <List.Item className='list-item'>{cidItem.cid}</List.Item>}
+                               dataSource={flattenCID(cids.lists)}
+                               renderItem={(cidItem) => <List.Item className='list-item'>
+                                   <img
+                                       width={72}
+                                       alt="preview"
+                                       src={getIPFSLink({cidItem})}
+                                   />
+                                   {cidItem}
+                               </List.Item>}
                         />
                         <Pagination style={{height: '32px', lineHeight: '32px', textAlign: 'right'}} current={current} onChange={page=>setCurrent(page)} total={cids.total} />
                     </div>                </Col>
                 <Col span={12}>
                     <div  className='cidgraph-card-colume'>
                         <List  className='cidgraph-card-colume-list'
-                            header={<div>CID</div>}
+                            header={<div style={{marginLeft:"16px"}}>  CID</div>}
                             pagination = {false}
                             dataSource={flatten(graphs.lists)}
-                            renderItem={(item) => <List.Item className='list-item'>{item}</List.Item>}
+                            renderItem={(item) => <List.Item className='list-item'>
+                                <img
+                                    width={72}
+                                    alt="logo"
+                                    src="https://gw.alipayobjects.com/zos/rmsportal/mqaQswcyDLcXyDKnZfES.png"
+                                />
+                                {item}
+                            </List.Item>}
                             />
                          <Pagination style={{height: '32px', lineHeight: '32px', textAlign: 'right'}} current={current} onChange={page=>setCurrent(page)} total={graphs.total} />
                     </div>
