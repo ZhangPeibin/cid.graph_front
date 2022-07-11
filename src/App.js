@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import Login from './pages/login/login.jsx'
 import Admin from './pages/admin/admin.jsx'
 import Home from './pages/home/index.jsx';
+import CidGraph from "./pages/cid/index.jsx";
 import { WagmiConfig, createClient } from 'wagmi'
 const client = createClient()
 
@@ -15,6 +16,7 @@ const App = () => {
               <Route path="/*" element={<Admin/>} />
               {/* home模块路由 */}
               <Route path="login" element={<Login />} />
+              <Route path="cid" element={<CidGraph />} />
           </Routes>
       </BrowserRouter>
   </WagmiConfig>

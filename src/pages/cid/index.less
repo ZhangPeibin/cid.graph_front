@@ -1,0 +1,79 @@
+.cidgraph {
+    width: 100vw;
+    height: 100vh;
+    background-image: url("../../assets/images/bg.png");
+    background-size: 100vh 100vw;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    .cidgraph-header {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      margin: auto;
+      width: 90%;
+      .logo{
+        color: white;
+      }
+      .cidgraph-header-search{
+        // background: rgb(83, 19, 201,0.7);
+        // width: 60%;
+        border: none;
+        
+      }
+      .btn-connect {
+        background: rgba(18, 222, 230, 0.7);
+        border: none;
+        color:white
+      }
+    }
+  
+    .cidgraph-content {
+      margin:  20px auto;
+      width: 90%;
+      .cidgraph-cards{
+        display:flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        .cidgraph-card{
+          text-align: center;
+          color: white;
+          background-image: url("../../assets/images/card_bg.png");
+          
+          .h2{
+            color: white;
+          }
+        }
+      }
+      
+    }
+
+    .cidgraph-card-colume {
+        display:flex;
+        flex-direction: column;
+        justify-content: space-between;
+        margin:  20px auto;
+        height: 350px;
+        width: 100%;
+        background-color: rgb(33,34,76);  
+
+        .cidgraph-card-colume-list{
+          display:flex;
+          flex-direction: column;
+          flex-wrap: wrap;
+          justify-content: space-between;
+          color:white;
+          // background-image: url("../../assets/images/card_bg.png");
+          .list-item{
+            color: white;
+            width: 100%;
+            height: 100%;
+          }
+
+        }
+    }
+
+
+
+  }

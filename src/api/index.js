@@ -37,16 +37,27 @@ export const reqWeather = (cityCode) => {
     })    
 };
 
-reqWeather('北京').then(data => {
-    console.log('data', data)
-})
-
-const BASE_URL = 'http://localhost:5000'
-
+const BASE_URL = '/api'
 //获取一级 or 二级列表
 export const reqCategorys = (parentId) => ajax(BASE_URL+'/manage/category/list', {parentId:parentId}, 'GET')
-//添加分类
-export const reqAddCategory = (categoryName, parentId) => ajax(BASE_URL+'/manage/category/add', {categoryName, parentId}, 'POST')
 
-//更新分类
-export const reqUpdateCategory = (categoryId, categoryName) => ajax(BASE_URL+'/manage/category/update', {categoryId, categoryName}, 'POST')
+//auth to get token
+export const reqGetToken = (graphObj) => ajax(BASE_URL+'/auth', graphObj, 'POST')
+
+//adduser: POST /api/v1/user
+export const postAddUser = (userObj) => ajax(BASE_URL+'/api/v1/user', userObj, 'POST')
+
+//api/v1/graph
+export const reqAddGraph = (graphObj) => ajax(BASE_URL+'/api/v1/graph', {...graphObj}, 'POST')
+
+// 4.update graph:PUT /api/v1/graph/:graph_id
+export const reqUpdateGraph = (graphObj) => ajax(BASE_URL+'/api/v1/graph/'+graphObj.id, graphObj, 'PUT')
+
+// 5.get graph:GET /api/v1/graph/2
+export const reqGraph = (graphId) => ajax(BASE_URL+'/api/v1/graph/'+graphId)
+
+///total/info
+export const reqGetTotalInfo = () => ajax(BASE_URL+'/total/info')
+
+//Get multiple graphs /api/v1/graphs
+export const reqGraphs = (reqObj) => ajax(BASE_URL+'/api/v1/graphs', reqObj,'GET')

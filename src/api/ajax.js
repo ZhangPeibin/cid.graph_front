@@ -30,7 +30,7 @@
        // 3. 如果失败了, 不调用reject(reason), 而是提示异常信息
        }).catch(error => {
          // reject(error)
-         message.error('天气获取失败！: ' + error.message)
+         message.error('接口调用失败！: ' + error.message)
        })
      })
     }
