@@ -158,6 +158,7 @@ export default function CidGraph() {
     <div className='cidgraph'>
         <div className='cidgraph-header'>
             <div className='logo'></div>
+            <div style={{marginRight:"32px",color:"#ffffff",marginLeft:"16px"}}> <h2 style={{color:"#ffffff"}}>Cid.Graph</h2></div>
             <Search className='cidgraph-header-search' placeholder="SEARCH BY PUECE COD DELE OR MINAB ID" onSearch={onSearch} enterButton />
 
             <div>
