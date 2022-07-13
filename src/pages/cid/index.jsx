@@ -15,6 +15,7 @@ import {addCid, reqCids, reqGetToken, reqGetTotalInfo, reqGraphs} from '../../ap
 import { Col, Row } from 'antd';
 import { useEffect,useState } from 'react';
 import {Web3Storage} from "web3.storage";
+import InputDetailsPage from "./InputDetailsPage";
 const { Search } = Input;
 
 const onSearch = (value) => console.log(value);
@@ -49,8 +50,13 @@ export default function CidGraph() {
 
     // 分页
     const [current, setCurrent] = useState(1);
+    const [showInputDialog, isShowInputDialog] = useState(false);
+    const [selectCid, setSelectCid] = useState("");
+
+
 
     const client = new Web3Storage({token: TOKEN});
+
 
     const onInputChange = async (event) => {
         const selectedFiles = event.target.files;
@@ -135,6 +141,14 @@ export default function CidGraph() {
         })
     }
 
+    const close = ()=>{
+        isShowInputDialog(false)
+    }
+
+    const clickItem = (cid)=>{
+        setSelectCid(cid)
+        isShowInputDialog(true )
+    }
 
     const addCidRequest = (cid,file) => {
         const requestObj = {
@@ -220,7 +234,7 @@ export default function CidGraph() {
                                header={<div style={{marginLeft:"16px"}}>CID</div>}
                                pagination = {false}
                                dataSource={flattenCID(cids.lists)}
-                               renderItem={(cidItem) => <List.Item className='list-item'>
+                               renderItem={(cidItem) => <List.Item className='list-item' onClick={()=>{clickItem(cidItem)}}>
                                    <img
                                        height={52}
                                        width={72}
@@ -254,6 +268,8 @@ export default function CidGraph() {
                 </Col>
              </Row>
         </div>
+
+        { showInputDialog && <InputDetailsPage close={close} cid={selectCid}/>}
     </div>
 
   )
