@@ -10,7 +10,6 @@ import Select from "react-select";
 import EditableTagGroup from "./EditableTagGroup";
 import {message} from 'antd';
 
-const antIcon = <LoadingOutlined style={{fontSize: 24}} spin/>;
 
 
 const customStyles = {
@@ -46,40 +45,22 @@ const options = [
     {value: 'The Unlicense', label: "The Unlicense"}
 ]
 
-function InputDetailsPage(props) {
+function ShowDetailsPage(props) {
+    const data = props.showDetailsData
+    const metas = JSON.parse(data.metas);
 
     const [open, setOpen] = React.useState(true);
     const [scroll, setScroll] = React.useState('paper');
-    const [title, setTitle] = React.useState(props.selectFile?props.selectFile.name:"");
-    const [author, setAuthor] = React.useState("");
-    const [aurl, setAurl] = React.useState("");
-    const [aintro, setAintro] = React.useState("");
-    const [license, setLicense] = React.useState("");
-    const [description, setDescription] = React.useState("");
-    const [tags, setTags] = React.useState([]);
-    const [cid, setCid] = React.useState(props.cid);
-    const file = props.selectFile
+    const [title, setTitle] = React.useState(data.name);
 
-    const FieldNotInput = "field can't be null"
-    const success = () => {
-        message.success('This is a success message');
-    };
+    const [author, setAuthor] = React.useState(metas['graphAuthor']);
+    const [aurl, setAurl] = React.useState(metas['graphAuthorUrl']);
+    const [aintro, setAintro] = React.useState(metas['graphAuthorIntro']);
+    const [license, setLicense] = React.useState(data.copyright);
+    const [description, setDescription] = React.useState(data.desc);
+    const [tags, setTags] = React.useState(metas['tag']);
+    const [cid, setCid] = React.useState(data.ipfs_cid);
 
-    const error = (msg) => {
-        message.error(msg);
-    };
-
-    const warning = () => {
-        message.warning('This is a warning message');
-    };
-
-    const handleDescription = (event) => {
-        setDescription(event.target.value)
-    }
-
-    const handleTagChanged = (v) => {
-        setTags(v)
-    }
 
     const handleClose = () => {
         props.close();
@@ -89,49 +70,6 @@ function InputDetailsPage(props) {
         console.log(selectedOption)
         setLicense(selectedOption.value)
     }
-
-
-    const handleOk = async () => {
-        if (!title) {
-            error("title" + FieldNotInput)
-            return;
-        }
-
-        if (!description) {
-            error("description" +FieldNotInput)
-            return;
-        }
-
-        if (!license) {
-            error("license" +FieldNotInput)
-            return
-        }
-        const  tagsString = tags.join(',');
-        const graphAuthor = author;
-        const metas = {
-            "tag":tagsString,
-            "graphAuthorIntro":aintro,
-            "graphAuthorUrl":aurl,
-            "graphAuthor":graphAuthor
-        }
-        const dj = {
-            "name":title,
-            "desc":description,
-            "metas": JSON.stringify(metas),
-            "graphAuthor":1,
-            "copyright":license,
-            "cid":cid,
-            "length":0,
-            "owner":0,
-            "size":file?file.size:0,
-            "state":0,
-            "tagID":0,
-            "type":file?file.type:"attachment",
-            "version":0
-        }
-        console.log(dj)
-        props.addGraph(dj)
-    };
 
     return (
         <div>
@@ -157,61 +95,48 @@ function InputDetailsPage(props) {
                         </button>
                         <div style={{height:"8px"}}/>
                         <h5 style={{color: "#ffffff",padding:0,margin:0}}>Name</h5>
-                        <input
-                            placeholder="file's name "
-                            type="text" name="item_title" id="item_title" className="form-control" value={title}
-                               onChange={(v) => {
-                                   setTitle(v.target.value)
-                               }}/>
+                        <button style={{color: "#1f1e1e"}}  type="text" name="item_title" id="item_title" className="form-control" >
+                            {title}
+                        </button>
                         <div style={{height:"8px"}}/>
                         <h5 style={{color: "#ffffff",padding:0,margin:0}}>GraphAuthor</h5>
-                        <input
-                            placeholder="who made this "
-                            type="text" name="item_desc" id="item_desc" className="form-control" value={author}
-                            onChange={(v) => {
-                                setAuthor(v.target.value)
-                            }}/>
+
+                        <button style={{color: "#1f1e1e"}}  type="text" name="item_title" id="item_title" className="form-control" >
+                            {author}
+                        </button>
                         <div style={{height:"8px"}}/>
                         <h5 style={{color: "#ffffff",padding:0,margin:0}}>GraphAuthor Introduce</h5>
-                        <input
-                            placeholder="graphAuthor's intro"
-                            type="text" name="item_desc" id="item_desc" className="form-control" value={aintro}
-                            onChange={(v) => {
-                                setAintro(v.target.value)
-                            }}/>
+                        <button style={{color: "#1f1e1e"}}  type="text" name="item_title" id="item_title" className="form-control" >
+                            {aintro}
+                        </button>
+
                         <div style={{height:"8px"}}/>
                         <h5 style={{color: "#ffffff",padding:0,margin:0}}>GraphAuthor website</h5>
-                        <input
-                            placeholder="graphAuthor's website"
-                            type="text" name="item_desc" id="item_desc" className="form-control" value={aurl}
-                            onChange={(v) => {
-                                setAurl(v.target.value)
-                            }}/>
+                        <button style={{color: "#1f1e1e"}}  type="text" name="item_title" id="item_title" className="form-control" >
+                            {aurl}
+                        </button>
                         <div style={{height:"8px"}}/>
                         <h5 style={{color: "#ffffff",padding:0,margin:0}}>License</h5>
                         <div className='dropdownSelect one' style={{height:"24px"}}>
-                            <Select
-                                className="basic-multi-select"
-                                classNamePrefix="select"
-                                styles={customStyles}
-                                onChange={onChange}
-                                menuContainerStyle={{'zIndex': 999}} options={options}/></div>
 
-                        <div style={{height:"8px"}}/>
-                        <div style={{marginTop: "18px"}}>
+                            <button style={{color: "#1f1e1e"}}  type="text" name="item_title" id="item_title" className="form-control" >
+                                {license}
+                            </button>
+                        </div>
+                        <div style={{marginTop: "12px"}}>
                             <h style={{color: "#ffffff",padding:0,margin:0}}>Tags</h>
                         </div>
                         <div>
-                            <EditableTagGroup tagChanged={handleTagChanged}/>
+                            <button style={{color: "#1f1e1e"}}  type="text" name="item_title" id="item_title" className="form-control" >
+                                {tags}
+                            </button>
                         </div>
                         <div style={{height:"8px"}}/>
 
                         <h5 style={{color: "#ffffff",padding:0,margin:0}}>Description</h5>
-                        <textarea
-                            style={{width:"100%"}}
-                            placeholder="description about this data"
-                            onChange={handleDescription} data-autoresize name="item_desc" id="item_desc"
-                            className="form-control" value={description}></textarea>
+                        <button style={{color: "#1f1e1e"}}  type="text" name="item_title" id="item_title" className="form-control" >
+                            {description}
+                        </button>
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions style={{background: "#21224C"}}>
@@ -221,13 +146,10 @@ function InputDetailsPage(props) {
                     <Button onClick={handleClose} style={{color: "#b1b3b4"}}>
                         Cancel
                     </Button>
-                    <Button onClick={handleOk} style={{color: "#ffffff"}}>
-                        Edit
-                    </Button>
                 </DialogActions>
             </Dialog>
         </div>
     );
 }
 
-export default InputDetailsPage
+export default ShowDetailsPage

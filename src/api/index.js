@@ -48,7 +48,7 @@ export const reqGetToken = (graphObj) => ajax(BASE_URL+'/auth', graphObj, 'POST'
 export const postAddUser = (userObj) => ajax(BASE_URL+'/api/v1/user', userObj, 'POST')
 
 //api/v1/graph
-export const reqAddGraph = (graphObj) => ajax(BASE_URL+'/api/v1/graph', {...graphObj}, 'POST')
+export const reqAddGraph = (graphObj) => ajax(BASE_URL+'/api/v1/graph', graphObj, 'POST')
 
 // 4.update graph:PUT /api/v1/graph/:graph_id
 export const reqUpdateGraph = (graphObj) => ajax(BASE_URL+'/api/v1/graph/'+graphObj.id, graphObj, 'PUT')

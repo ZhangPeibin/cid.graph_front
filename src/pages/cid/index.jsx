@@ -1,21 +1,18 @@
 import React from 'react'
-import { Card } from 'antd';
+import {Card, message} from 'antd';
 import { Divider, List, Typography } from 'antd';
 import { Pagination } from 'antd';
 import { Input, Space } from 'antd';
-import {
-    useAccount,
-    useConnect,
-    useDisconnect,
-    useEnsAvatar,
-    useEnsName,
-  } from 'wagmi'
 import "./index.less"
-import {addCid, reqCids, reqGetToken, reqGetTotalInfo, reqGraphs} from '../../api';
+import {addCid, reqAddGraph, reqCids, reqGetToken, reqGetTotalInfo, reqGraphs} from '../../api';
 import { Col, Row } from 'antd';
 import { useEffect,useState } from 'react';
 import {Web3Storage} from "web3.storage";
 import InputDetailsPage from "./InputDetailsPage";
+import {Profile} from "./Profile";
+import ShowDetailsPage from "./ShowDetailsPage";
+import {useSignMessage} from "wagmi";
+import {verifyMessage} from "ethers/lib.esm/utils";
 const { Search } = Input;
 
 const onSearch = (value) => console.log(value);
@@ -23,22 +20,26 @@ const onSearch = (value) => console.log(value);
 // 返回对象数组扁平化 可以用于渲染
 const flatten = (arr) => {
     if(!arr) return []
-    const res =  arr.map(item =>  item.ipfs_cid + " " + item.name + " " + item.desc )
+    const res =  arr.map(item =>  item )
     return res
 }
 
 const flattenCID = (arr) => {
     if(!arr) return []
-    const res =  arr.map(item =>  item.cid )
+    const res =  arr.map(item =>  item )
     return res
 }
 const TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweDk2YTQzQ0Q0MEUwZkRhODU2Q2JGOUYzN0Y5MkJkNTM2RjRlODAwNzIiLCJpc3MiOiJ3ZWIzLXN0b3JhZ2UiLCJpYXQiOjE2NTcwODIxMjc0MTAsIm5hbWUiOiJydXN0LXZpZGVvLWJhaXNjIn0.-jf-5qDcA2fbQ66hmNlquxLJ8JdAftrrUEQtftbNsIM"
 export default function CidGraph() {
-    const { data: account } = useAccount()
-    const { data: ensAvatar } = useEnsAvatar({ addressOrName: account?.address })
-    const { data: ensName } = useEnsName({ address: account?.address })
-    const { connect, connectors, error,isLoading, pendingConnector } = useConnect()
-    const { disconnect } = useDisconnect()
+    const recoveredAddress = React.useRef();
+    const { data, error, isLoading, signMessage } = useSignMessage({
+        onSuccess(data, variables) {
+            // Verify signature when sign message succeeds
+            const address = verifyMessage(variables.message, data)
+            recoveredAddress.current = address
+        },
+    })
+
     // 首页total
     const [totalInfo,setTotalInfo] = useState({})
     // 登录后的token
@@ -50,8 +51,15 @@ export default function CidGraph() {
 
     // 分页
     const [current, setCurrent] = useState(1);
+    const [cidPageIndex, setCidPageIndex] = useState(1);
+
     const [showInputDialog, isShowInputDialog] = useState(false);
+    const [showDetailsDialog, isShowDetailsDialog] = useState(false);
+    const [showDetailsData, setShowDetailsData] = useState(null);
+
+
     const [selectCid, setSelectCid] = useState("");
+    const [selectFile, setSelectFile] = useState(null);
 
 
 
@@ -59,16 +67,20 @@ export default function CidGraph() {
 
 
     const onInputChange = async (event) => {
-        const selectedFiles = event.target.files;
-        console.log(selectedFiles)
-        try {
-            const rootCid = await client.put(selectedFiles,{wrapWithDirectory:false});
-            console.log("Successfully sent to IPFS");
-            console.log("https://" + rootCid + ".ipfs.dweb.link");
-            addCidRequest(rootCid,selectedFiles[0])
-        } catch {
-            console.log("Failed to send to IPFS");
-        }
+
+        signMessage({message:"this is a test"})
+
+        // const selectedFiles = event.target.files;
+        // console.log(selectedFiles)
+        // try {
+        //     const rootCid = await client.put(selectedFiles,{wrapWithDirectory:false});
+        //     console.log("Successfully sent to IPFS");
+        //     console.log("https://" + rootCid + ".ipfs.dweb.link");
+        //     setSelectFile(selectedFiles[0])
+        //     addCidRequest(rootCid,selectedFiles[0])
+        // } catch {
+        //     console.log("Failed to send to IPFS");
+        // }
     }
 
 
@@ -98,14 +110,13 @@ export default function CidGraph() {
             console.log("token",token);
             const reqObj = {
                 token: token,
-                page: current
+                page: current,
             }
             reqGraphsRes(reqObj)
         }
     },[token,current])
 
     useEffect(() => {
-        //获取账号的graphs
         const reqCidPools = async (reqObj) => {
             const res = await reqCids(reqObj);
             setCids(res.data)
@@ -114,14 +125,19 @@ export default function CidGraph() {
         if(token){
             const reqObj = {
                 token: token,
-                page: current
+                page: cidPageIndex,
+                state:1
             }
             reqCidPools(reqObj)
         }
-    },[token,current])
+    },[token,cidPageIndex])
+
+    const success = (msg) => {
+        message.success(msg);
+    };
 
     const getIPFSLink = (cid) =>{
-        return "https://ipfs.io/ipfs/" + cid['cidItem']
+        return "https://ipfs.io/ipfs/" + cid
     }
 
     const onSignIn = () => {
@@ -141,13 +157,34 @@ export default function CidGraph() {
         })
     }
 
-    const close = ()=>{
-        isShowInputDialog(false)
+    const addGraph = (kv)=>{
+        reqAddGraph(kv).then(res => {
+                console.log(res)
+                if(res["code"] === 200){
+                    success("add graph success")
+                    isShowInputDialog(false)
+                }
+            }
+        ).catch(err => {
+            console.log(err)
+        })
     }
 
-    const clickItem = (cid)=>{
-        setSelectCid(cid)
-        isShowInputDialog(true )
+    const close = ()=>{
+        isShowInputDialog(false)
+        isShowDetailsDialog(false)
+    }
+
+    const clickItem = (cidItem)=>{
+        setSelectCid(cidItem['cid'])
+        isShowInputDialog(true)
+        isShowDetailsDialog(false )
+    }
+
+    const viewItem = (cidItem) =>{
+        setShowDetailsData(cidItem)
+        isShowInputDialog(false)
+        isShowDetailsDialog(true )
     }
 
     const addCidRequest = (cid,file) => {
@@ -162,6 +199,7 @@ export default function CidGraph() {
         }
         addCid(requestObj).then(res => {
                 console.log(res)
+                isShowInputDialog(true)
             }
         ).catch(err => {
             console.log(err)
@@ -171,7 +209,7 @@ export default function CidGraph() {
   return (
     <div className='cidgraph'>
         <div className='cidgraph-header'>
-            <div className='logo'></div>
+            <div className='logo'/>
             <div style={{marginRight:"32px",color:"#ffffff",marginLeft:"16px"}}> <h2 style={{color:"#ffffff"}}>Cid.Graph</h2></div>
             <Search className='cidgraph-header-search' placeholder="SEARCH BY PUECE COD DELE OR MINAB ID" onSearch={onSearch} enterButton />
 
@@ -187,19 +225,7 @@ export default function CidGraph() {
                 </button>
             </div>
 
-            {connectors.map((connector) => (
-            <button className='btn-connect'
-                disabled={!connector.ready}
-                key={connector.id}
-                onClick={() => connect(connector)}
-            >
-                {connector.name}
-                {!connector.ready && ' (unsupported)'}
-                {isLoading &&
-                connector.id === pendingConnector?.id &&
-                ' (connecting)'}
-            </button>
-            ))}
+            <Profile/>
         </div>
         <div className='cidgraph-content'>
              <Row gutter={16} className="cidgraph-cards">
@@ -235,17 +261,30 @@ export default function CidGraph() {
                                pagination = {false}
                                dataSource={flattenCID(cids.lists)}
                                renderItem={(cidItem) => <List.Item className='list-item' onClick={()=>{clickItem(cidItem)}}>
-                                   <img
-                                       height={52}
-                                       width={72}
-                                       alt="preview"
-                                       style={{objectFit:"scale-down",marginRight:"12px"}}
-                                       src={getIPFSLink({cidItem})}
-                                   />
-                                   {cidItem}
+                                   {
+                                       cidItem.type.startsWith("image/") ? (
+                                           <img
+                                               height={52}
+                                               width={72}
+                                               alt="preview"
+                                               style={{objectFit:"scale-down",marginRight:"12px"}}
+                                               src={getIPFSLink(cidItem.cid)}
+                                           />
+                                       ):(
+                                           <img
+                                               height={52}
+                                               width={72}
+                                               alt="preview"
+                                               style={{objectFit:"scale-down",marginRight:"12px"}}
+                                               src={"https://play-lh.googleusercontent.com/emmbClh_hm0WpWZqJ0X59B8Pz1mKoB9HVLkYMktxhGE6_-30SdGoa-BmYW73RJ8MGZQ"}
+                                           />
+                                       )
+                                   }
+
+                                   {cidItem.cid}
                                </List.Item>}
                         />
-                        <Pagination style={{height: '32px', lineHeight: '32px', textAlign: 'right'}} current={current} onChange={page=>setCurrent(page)} total={cids.total} />
+                        <Pagination style={{height: '32px', lineHeight: '32px', textAlign: 'right'}} defaultPageSize={6} current={cidPageIndex} onChange={page=>setCidPageIndex(page)} total={cids.total} />
                     </div>                </Col>
                 <Col span={12}>
                     <div  className='cidgraph-card-colume'>
@@ -253,14 +292,30 @@ export default function CidGraph() {
                             header={<div style={{marginLeft:"16px"}}>  CID</div>}
                             pagination = {false}
                             dataSource={flatten(graphs.lists)}
-                            renderItem={(item) => <List.Item className='list-item'>
-                                <img
-                                    height={52}
-                                    alt="logo"
-                                    style={{marginRight:"12px"}}
-                                    src="https://gw.alipayobjects.com/zos/rmsportal/mqaQswcyDLcXyDKnZfES.png"
+                            renderItem={(cidItem) => <List.Item className='list-item'  onClick={()=>{viewItem(cidItem)}}>
+                                <List.Item.Meta
+                                    avatar={
+                                        cidItem.type.startsWith("image/") ? (
+                                            <img
+                                                height={52}
+                                                width={72}
+                                                alt="preview"
+                                                style={{objectFit:"scale-down",marginRight:"12px"}}
+                                                src={getIPFSLink(cidItem.ipfs_cid)}
+                                            />
+                                        ):(
+                                            <img
+                                                height={52}
+                                                width={72}
+                                                alt="preview"
+                                                style={{objectFit:"scale-down",marginRight:"12px"}}
+                                                src={"https://play-lh.googleusercontent.com/emmbClh_hm0WpWZqJ0X59B8Pz1mKoB9HVLkYMktxhGE6_-30SdGoa-BmYW73RJ8MGZQ"}
+                                            />
+                                        )
+                                    }
+                                    title={<h4 style={{color:"#ffffff"}}>{cidItem.name + " - "+ cidItem.ipfs_cid} </h4>}
+                                    description={<span style={{color:"#9e9c9c"}}>cidItem.desc</span>}
                                 />
-                                {item}
                             </List.Item>}
                             />
                          <Pagination style={{height: '32px', lineHeight: '32px', textAlign: 'right'}} current={current} onChange={page=>setCurrent(page)} total={graphs.total} />
@@ -269,7 +324,13 @@ export default function CidGraph() {
              </Row>
         </div>
 
-        { showInputDialog && <InputDetailsPage close={close} cid={selectCid}/>}
+        { showInputDialog && <InputDetailsPage
+            addGraph ={addGraph}
+            close={close} cid={selectCid} selectFile={selectFile}/>}
+
+
+        { showDetailsDialog && <ShowDetailsPage
+            close={close} showDetailsData={showDetailsData}/>}
     </div>
 
   )
